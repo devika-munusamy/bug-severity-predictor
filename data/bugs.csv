@@ -1,0 +1,9 @@
+error_message,user_count,severity
+TypeError undefined,2,Low
+Payment gateway failed,50,High
+Login button not clickable,10,Medium
+Cannot read property of null,3,Low
+Checkout failed for multiple users,75,High
+API timeout error,20,Medium
+CSS not loading,5,Low
+Database connection refused,80,High

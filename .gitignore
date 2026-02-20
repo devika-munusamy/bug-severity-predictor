@@ -1,0 +1,46 @@
+# ==================================
+# Python Backend
+# ==================================
+
+# Virtual Environment
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Model artifacts
+model/model.pkl
+
+# Environment variables
+.env
+
+# Logs
+*.log
+
+# ==================================
+# Node (Frontend handled separately)
+# ==================================
+frontend/node_modules/
+frontend/build/
+
+# ==================================
+# OS Files
+# ==================================
+.DS_Store
+Thumbs.db
+
+# ==================================
+# VS Code / IDE
+# ==================================
+.vscode/
+.idea/
