@@ -1,26 +1,22 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_cors import CORS
-import joblib
+from db.database import init_db
+from routes.predict import predict_bp
+from routes.history import history_bp
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
-# ✅ Enable CORS for all routes
-CORS(app, resources={r"/*": {"origins": "*"}})
+    # Initialise SQLite on startup
+    init_db()
 
-model = joblib.load("../model/model.pkl")
+    # Register blueprints
+    app.register_blueprint(predict_bp)
+    app.register_blueprint(history_bp)
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    data = request.json
-    error_message = data["error_message"]
-
-    prediction = model.predict([error_message])[0]
-    probability = model.predict_proba([error_message]).max()
-
-    return jsonify({
-        "severity": prediction,
-        "confidence": float(probability)
-    })
+    return app
 
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True)

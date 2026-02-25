@@ -28,6 +28,13 @@ model/model.pkl
 *.log
 
 # ==================================
+# Databases
+# ==================================
+*.db
+*.sqlite
+*.sqlite3
+
+# ==================================
 # Node (Frontend handled separately)
 # ==================================
 frontend/node_modules/

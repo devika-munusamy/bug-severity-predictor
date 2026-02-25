@@ -7,3 +7,20 @@ Checkout failed for multiple users,75,High
 API timeout error,20,Medium
 CSS not loading,5,Low
 Database connection refused,80,High
+NullPointerException in user module,4,Low
+Order processing failed,65,High
+Image upload not working,12,Medium
+Session expired unexpectedly,30,Medium
+Uncaught RangeError,1,Low
+Server internal error 500,90,High
+UI misaligned on mobile,8,Low
+Password reset email not sent,40,Medium
+Memory leak detected in service,60,High
+Variable is not defined,2,Low
+Cart total incorrect,25,Medium
+Application crash on startup,100,High
+Console warning in dev tools,1,Low
+Webhook delivery failing,45,Medium
+Critical security vulnerability found,120,High
+Missing translation key,3,Low
+Search results not loading,18,Medium
