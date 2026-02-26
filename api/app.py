@@ -3,6 +3,8 @@ from flask_cors import CORS
 from db.database import init_db
 from routes.predict import predict_bp
 from routes.history import history_bp
+from routes.anomaly import anomaly_bp
+
 
 def create_app():
     app = Flask(__name__)
@@ -14,8 +16,10 @@ def create_app():
     # Register blueprints
     app.register_blueprint(predict_bp)
     app.register_blueprint(history_bp)
+    app.register_blueprint(anomaly_bp)
 
     return app
+
 
 if __name__ == "__main__":
     app = create_app()

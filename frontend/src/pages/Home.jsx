@@ -2,6 +2,18 @@ import React, { useState } from "react";
 
 const SEVERITY_COLOR = { High: "#ef4444", Medium: "#f97316", Low: "#22c55e" };
 
+const CATEGORY_ICON = {
+  "Null Reference Error":     "🔴",
+  "Network Error":            "🌐",
+  "Payment Failure":          "💳",
+  "Authentication Error":     "🔑",
+  "Database Error":           "🗄️",
+  "Resource Exhaustion":      "💾",
+  "Timeout Error":            "⏱",
+  "File System Error":        "📂",
+  "General Application Error":"⚠️",
+};
+
 export default function Home() {
   const [errorMessage, setErrorMessage] = useState("");
   const [userCount, setUserCount] = useState(1);
@@ -62,28 +74,54 @@ export default function Home() {
         {error && <p className="error-msg">{error}</p>}
 
         {result && (
-          <div className="result-card">
-            <h3 className="result-heading">Prediction Result</h3>
-            <div className="result-grid">
-              <div className="result-item">
-                <span className="result-label">Severity</span>
-                <span
-                  className="result-value severity-pill"
-                  style={{ background: SEVERITY_COLOR[result.severity] }}
-                >
-                  {result.severity}
-                </span>
-              </div>
-              <div className="result-item">
-                <span className="result-label">Confidence</span>
-                <span className="result-value">{(result.confidence * 100).toFixed(2)}%</span>
-              </div>
-              <div className="result-item">
-                <span className="result-label">Impact Score</span>
-                <span className="result-value">{result.impact_score}</span>
+          <>
+            {/* ── Severity / Confidence / Impact ── */}
+            <div className="result-card">
+              <h3 className="result-heading">Prediction Result</h3>
+              <div className="result-grid">
+                <div className="result-item">
+                  <span className="result-label">Severity</span>
+                  <span
+                    className="result-value severity-pill"
+                    style={{ background: SEVERITY_COLOR[result.severity] }}
+                  >
+                    {result.severity}
+                  </span>
+                </div>
+                <div className="result-item">
+                  <span className="result-label">Confidence</span>
+                  <span className="result-value">{(result.confidence * 100).toFixed(2)}%</span>
+                </div>
+                <div className="result-item">
+                  <span className="result-label">Impact Score</span>
+                  <span className="result-value">{result.impact_score}</span>
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* ── Root Cause Analysis ── */}
+            <div className="rca-card">
+              <div className="rca-header">
+                <span className="rca-icon">
+                  {CATEGORY_ICON[result.category] || "⚠️"}
+                </span>
+                <div>
+                  <p className="rca-title">Root Cause Analysis</p>
+                  <span className="rca-category-badge">{result.category}</span>
+                </div>
+              </div>
+
+              <div className="rca-section">
+                <p className="rca-section-label">💡 Root Cause</p>
+                <p className="rca-section-text">{result.root_cause}</p>
+              </div>
+
+              <div className="rca-section">
+                <p className="rca-section-label">🛠 Suggested Fix</p>
+                <pre className="rca-fix-steps">{result.suggested_fix}</pre>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
