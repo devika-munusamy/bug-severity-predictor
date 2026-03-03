@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { io } from "socket.io-client";
 import HistoryTable from "../components/HistoryTable";
 import SeverityChart from "../components/SeverityChart";
 import ErrorTimeChart from "../components/ErrorTimeChart";
@@ -28,6 +29,21 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // WebSocket for Live Monitoring
+  useEffect(() => {
+    const socket = io("http://127.0.0.1:5000");
+
+    socket.on("new_bug", (newBug) => {
+      console.log("Live Bug Received:", newBug);
+      // Prepend the new bug to the history list
+      setHistory((prev) => [newBug, ...prev]);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   // Auto-refresh anomaly status every 30 s
   useEffect(() => {

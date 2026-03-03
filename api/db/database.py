@@ -57,8 +57,10 @@ def save_prediction(
         error_category,
         datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
     ))
+    prediction_id = cursor.lastrowid
     conn.commit()
     conn.close()
+    return prediction_id
 
 
 def get_history():
