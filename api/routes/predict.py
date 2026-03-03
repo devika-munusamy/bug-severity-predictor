@@ -9,7 +9,7 @@ predict_bp = Blueprint("predict", __name__)
 
 @predict_bp.route("/predict", methods=["POST"])
 def predict_route():
-    from app import socketio
+    from extensions import socketio
 
     data = request.get_json(force=True)
     error_message = data.get("error_message", "").strip()

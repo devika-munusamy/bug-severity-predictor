@@ -1,14 +1,11 @@
 from flask import Flask
 from flask_cors import CORS
-from flask_socketio import SocketIO
+from extensions import socketio
 from db.database import init_db
 from routes.predict import predict_bp
 from routes.history import history_bp
 from routes.anomaly import anomaly_bp
 from routes.receiver import receiver_bp
-
-# Initialize SocketIO
-socketio = SocketIO(cors_allowed_origins="*")
 
 def create_app():
     app = Flask(__name__)
@@ -27,7 +24,6 @@ def create_app():
     app.register_blueprint(receiver_bp)
 
     return app
-
 
 if __name__ == "__main__":
     app = create_app()

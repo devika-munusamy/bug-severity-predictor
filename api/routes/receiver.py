@@ -12,7 +12,7 @@ def receive_event():
     Endpoint for external applications to send live error data.
     Expected JSON: { "error_message": "...", "user_count": 1, "app_source": "external-app" }
     """
-    from app import socketio  # Avoid circular import
+    from extensions import socketio  # Avoid circular import
 
     data = request.get_json(force=True)
     error_message = data.get("error_message", "").strip()
