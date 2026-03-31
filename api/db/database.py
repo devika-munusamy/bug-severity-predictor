@@ -19,15 +19,23 @@ def init_db():
             confidence         REAL    NOT NULL,
             impact_score       REAL    NOT NULL,
             error_category     TEXT    NOT NULL DEFAULT 'Unknown',
+            root_cause         TEXT,
+            suggested_fix      TEXT,
             timestamp          TEXT    NOT NULL
         )
     """)
 
-    # Gracefully add `error_category` if the DB was created before this column existed
-    try:
-        cursor.execute("ALTER TABLE predictions ADD COLUMN error_category TEXT NOT NULL DEFAULT 'Unknown'")
-    except sqlite3.OperationalError:
-        pass  # column already present
+    # Gracefully add new columns if the DB was created before they existed
+    columns_to_add = [
+        "error_category TEXT NOT NULL DEFAULT 'Unknown'",
+        "root_cause TEXT",
+        "suggested_fix TEXT"
+    ]
+    for col in columns_to_add:
+        try:
+            cursor.execute(f"ALTER TABLE predictions ADD COLUMN {col}")
+        except sqlite3.OperationalError:
+            pass  # column already present
 
     conn.commit()
     conn.close()
@@ -40,14 +48,16 @@ def save_prediction(
     confidence: float,
     impact_score: float,
     error_category: str = "Unknown",
+    root_cause: str = "",
+    suggested_fix: str = "",
 ):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO predictions
           (error_message, user_count, predicted_severity, confidence,
-           impact_score, error_category, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+           impact_score, error_category, root_cause, suggested_fix, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         error_message,
         user_count,
@@ -55,6 +65,8 @@ def save_prediction(
         round(confidence, 4),
         round(impact_score, 4),
         error_category,
+        root_cause,
+        suggested_fix,
         datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
     ))
     prediction_id = cursor.lastrowid
@@ -69,7 +81,7 @@ def get_history():
     cursor = conn.cursor()
     cursor.execute("""
         SELECT id, error_message, user_count, predicted_severity,
-               confidence, impact_score, error_category, timestamp
+               confidence, impact_score, error_category, root_cause, suggested_fix, timestamp
         FROM predictions
         ORDER BY id DESC
     """)

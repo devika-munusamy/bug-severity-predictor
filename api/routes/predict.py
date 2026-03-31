@@ -32,6 +32,8 @@ def predict_route():
         confidence=result["confidence"],
         impact_score=result["impact_score"],
         error_category=analysis["category"],
+        root_cause=analysis["root_cause"],
+        suggested_fix=analysis["suggested_fix"],
     )
 
     # Broadcast for Live Monitoring
@@ -43,7 +45,9 @@ def predict_route():
         "predicted_severity": result["severity"],
         "confidence": result["confidence"],
         "impact_score": result["impact_score"],
-        "error_category": analysis["category"]
+        "error_category": analysis["category"],
+        "root_cause": analysis["root_cause"],
+        "suggested_fix": analysis["suggested_fix"],
     }
     socketio.emit("new_bug", live_event)
 

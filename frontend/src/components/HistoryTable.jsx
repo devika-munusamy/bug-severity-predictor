@@ -2,7 +2,7 @@ import React from "react";
 
 const SEVERITY_CLASS = { High: "badge-high", Medium: "badge-medium", Low: "badge-low" };
 
-export default function HistoryTable({ history }) {
+export default function HistoryTable({ history, onRowClick }) {
   if (!history.length) {
     return <p className="empty-msg">No predictions yet. Go to Predict to get started!</p>;
   }
@@ -27,7 +27,11 @@ export default function HistoryTable({ history }) {
             // Ensure format like YYYY-MM-DDTHH:MM:SSZ so JS Date parses it correctly in UTC
             const localTime = new Date(row.timestamp.replace(" ", "T") + "Z").toLocaleString();
             return (
-            <tr key={row.id}>
+            <tr 
+              key={row.id} 
+              className={onRowClick ? "clickable-row" : ""} 
+              onClick={() => onRowClick && onRowClick(row)}
+            >
               <td>{idx + 1}</td>
               <td className="col-time">{localTime}</td>
               <td className="col-msg">{row.error_message}</td>

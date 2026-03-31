@@ -1,14 +1,20 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { io } from "socket.io-client";
 import HistoryTable from "../components/HistoryTable";
 import SeverityChart from "../components/SeverityChart";
 import ErrorTimeChart from "../components/ErrorTimeChart";
+import BugDetailModal from "../components/BugDetailModal";
 
 export default function Dashboard() {
   const [history, setHistory] = useState([]);
   const [anomaly, setAnomaly] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [selectedBug, setSelectedBug] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [severityFilter, setSeverityFilter] = useState("All");
+  const [sourceFilter, setSourceFilter] = useState("All");
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -56,6 +62,48 @@ export default function Dashboard() {
     }, 30_000);
     return () => clearInterval(id);
   }, []);
+
+  // Filter Logic
+  const filteredHistory = useMemo(() => {
+    return history.filter(bug => {
+      // Severity Match
+      const matchSev = severityFilter === "All" || bug.predicted_severity === severityFilter;
+      // Source Match (Extracting [app_source] using quick logic, or just substring if we prefer)
+      const msgLower = bug.error_message.toLowerCase();
+      const matchSource = sourceFilter === "All" || msgLower.includes(`[${sourceFilter.toLowerCase()}]`);
+      // Keyword Match
+      const matchSearch = searchQuery === "" || msgLower.includes(searchQuery.toLowerCase()) || 
+                          (bug.root_cause && bug.root_cause.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchSev && matchSource && matchSearch;
+    });
+  }, [history, severityFilter, sourceFilter, searchQuery]);
+
+  // Unique sources for dropdown
+  const sources = useMemo(() => {
+    const s = new Set(["All"]);
+    history.forEach(h => {
+      const match = h.error_message.match(/^\[(.*?)\]/);
+      if (match) s.add(match[1]);
+    });
+    return Array.from(s);
+  }, [history]);
+
+  // CSV Export
+  const exportToCSV = () => {
+    if (!filteredHistory.length) return;
+    const headers = ["Timestamp", "Error Message", "Category", "Users", "Severity", "Impact Score"];
+    const rows = filteredHistory.map(r => 
+      [r.timestamp, `"${r.error_message.replace(/"/g, '""')}"`, r.error_category, r.user_count, r.predicted_severity, r.impact_score].join(",")
+    );
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `bug_history_${new Date().toISOString()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="dashboard-page">
@@ -108,12 +156,38 @@ export default function Dashboard() {
         <ErrorTimeChart timeSeries={anomaly.time_series} />
       )}
 
+      {/* ── Filter Panel ── */}
+      <div className="filter-panel">
+        <div className="filter-group">
+          <input 
+            type="text" 
+            className="filter-input" 
+            placeholder="Search errors or causes..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <select className="filter-select" value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)}>
+            <option value="All">All Severities</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+          <select className="filter-select" value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
+            {sources.map(src => <option key={src} value={src}>{src === "All" ? "All Sources" : src}</option>)}
+          </select>
+        </div>
+        <button className="btn-export" onClick={exportToCSV}>📥 Export CSV</button>
+      </div>
+
       {/* ── History Table ── */}
       {loading ? (
         <p className="loading-msg">Loading…</p>
       ) : (
-        <HistoryTable history={history} />
+        <HistoryTable history={filteredHistory} onRowClick={setSelectedBug} />
       )}
+
+      {/* ── Bug Detail Modal ── */}
+      <BugDetailModal bug={selectedBug} onClose={() => setSelectedBug(null)} />
     </div>
   );
 }
